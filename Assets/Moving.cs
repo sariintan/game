@@ -8,6 +8,7 @@ public class Moving : MonoBehaviour
     [SerializeField] private float jumpHeight = 5f;
     [SerializeField] private LayerMask groundLayer;
     private Rigidbody2D _rbody;
+    private Animator _animator;
     private float _horizontalMovement;
     private bool _onTheGround;
 
@@ -17,7 +18,7 @@ public class Moving : MonoBehaviour
 
     }
 
-    private float HorizontalMovement;
+    private float _HorizontalMovement;
 
     private void setHorizontalMovement(float value)
     {
@@ -39,6 +40,7 @@ public class Moving : MonoBehaviour
     private void Awake()
     {
         _rbody = GetComponent<Rigidbody2D>();
+        _animator = GetComponent<Animator>();
     }
 
     private void FixedUpdate()
@@ -73,5 +75,19 @@ public class Moving : MonoBehaviour
                  ForceMode2D.Impulse
                 );
         }
+    }
+    public float HorizontalMovement
+    {
+        private set
+
+        {
+
+            if (value != _horizontalMovement)
+            {
+                _horizontalMovement = value;
+                _animator.SetFloat("xSpeed", Mathf.Abs(_horizontalMovement));
+            }
+        }
+        get => _horizontalMovement;
     }
 }
