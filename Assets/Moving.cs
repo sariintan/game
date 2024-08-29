@@ -33,7 +33,7 @@ public class Moving : MonoBehaviour
     void Update()
     {
         GroundCheck();
-        _horizontalMovement = Input.GetAxis("Horizontal");
+        _horizontalMovement = (Input.GetAxis("Horizontal"));
         Jump();
     }
 
@@ -50,6 +50,13 @@ public class Moving : MonoBehaviour
     private void Move()
     {
         _rbody.velocity = new Vector2(Input.GetAxis("Horizontal") * moveSpeed, _rbody.velocity.y);
+
+        float horizontalInput = Input.GetAxis("Horizontal");
+
+        if ((horizontalInput > 0 && !FacingRight) || (horizontalInput < 0 && FacingRight))
+        {
+            FacingRight = !FacingRight;
+        }
     }
 
     private bool OnTheGround()
@@ -86,8 +93,53 @@ public class Moving : MonoBehaviour
             {
                 _horizontalMovement = value;
                 _animator.SetFloat("xSpeed", Mathf.Abs(_horizontalMovement));
+
+                if (_horizontalMovement > 0)
+                    FacingRight = _horizontalMovement > 0;
             }
         }
         get => _horizontalMovement;
+    }
+    private void Flip(float speed)
+    {
+        if (speed > 0)
+            transform.rotation = new Quaternion(
+                  transform.rotation.x,
+                  0,
+                  transform.rotation.z,
+                  transform.rotation.w
+
+                );
+        else if (speed < 0)
+            transform.rotation = new Quaternion(
+                  transform.rotation.x,
+                  180,
+                  transform.rotation.z,
+                  transform.rotation.w
+
+                );
+    }
+
+    private void Flip()
+    {
+        Vector3 scale = transform.localScale;
+        scale.x *= -1;
+        transform.localScale = scale;
+    }
+
+
+    private bool _facingRight = true;
+
+    public bool FacingRight
+    {
+        private set
+        {
+            if (_facingRight != value)
+            {
+                _facingRight = value;
+                Flip();
+            }
+        }
+        get => _facingRight;
     }
 }
