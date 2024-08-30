@@ -11,6 +11,7 @@ public class Moving : MonoBehaviour
     private Animator _animator;
     private float _horizontalMovement;
     private bool _onTheGround;
+    private float _verticalSpeed;
 
     // Start is called before the first frame update
     void Start()
@@ -18,21 +19,30 @@ public class Moving : MonoBehaviour
 
     }
 
-    private float _HorizontalMovement;
-
-    private void setHorizontalMovement(float value)
+    public float HorizontalMovement
     {
-        if (value != _horizontalMovement)
+        private set
         {
-            _horizontalMovement = value;
-        }
+            if (value != _horizontalMovement)
+            {
+                _horizontalMovement = value;
 
+                _animator.SetFloat("xSpeed", Mathf.Abs(_horizontalMovement));
+
+
+                if (_horizontalMovement > 0)
+                    FacingRight = _horizontalMovement > 0;
+            }
+        }
+        get => _horizontalMovement;
     }
 
     // Update is called once per frame
     void Update()
     {
         GroundCheck();
+        VerticalSpeed = _rbody.velocity.y;
+
         _horizontalMovement = (Input.GetAxis("Horizontal"));
         Jump();
     }
@@ -47,6 +57,7 @@ public class Moving : MonoBehaviour
     {
         Move();
     }
+
     private void Move()
     {
         _rbody.velocity = new Vector2(Input.GetAxis("Horizontal") * moveSpeed, _rbody.velocity.y);
@@ -59,11 +70,17 @@ public class Moving : MonoBehaviour
         }
     }
 
-    private bool OnTheGround()
+    public bool OnTheGround
     {
-        RaycastHit2D hit =
-            Physics2D.Raycast(transform.position, Vector2.down, 2f, groundLayer);
-        return hit.collider != null;
+        private set
+        {
+            if (_onTheGround != value)
+            {
+                _onTheGround = value;
+                _animator.SetBool("grounded", _onTheGround);
+            }
+        }
+        get => _onTheGround;
     }
 
     private void GroundCheck()
@@ -77,47 +94,9 @@ public class Moving : MonoBehaviour
     {
         if (Input.GetButtonDown("Jump") && _onTheGround)
         {
-            _rbody.AddForce(
-                 Vector2.up * jumpHeight,
-                 ForceMode2D.Impulse
-                );
+            _animator.SetTrigger("jumpTrigger");
+            _rbody.AddForce(Vector2.up * jumpHeight, ForceMode2D.Impulse);
         }
-    }
-    public float HorizontalMovement
-    {
-        private set
-
-        {
-
-            if (value != _horizontalMovement)
-            {
-                _horizontalMovement = value;
-                _animator.SetFloat("xSpeed", Mathf.Abs(_horizontalMovement));
-
-                if (_horizontalMovement > 0)
-                    FacingRight = _horizontalMovement > 0;
-            }
-        }
-        get => _horizontalMovement;
-    }
-    private void Flip(float speed)
-    {
-        if (speed > 0)
-            transform.rotation = new Quaternion(
-                  transform.rotation.x,
-                  0,
-                  transform.rotation.z,
-                  transform.rotation.w
-
-                );
-        else if (speed < 0)
-            transform.rotation = new Quaternion(
-                  transform.rotation.x,
-                  180,
-                  transform.rotation.z,
-                  transform.rotation.w
-
-                );
     }
 
     private void Flip()
@@ -141,5 +120,18 @@ public class Moving : MonoBehaviour
             }
         }
         get => _facingRight;
+    }
+
+    public float VerticalSpeed
+    {
+        private set
+        {
+            if (_verticalSpeed != value)
+            {
+                _verticalSpeed = value;
+                _animator.SetFloat("ySpeed", _verticalSpeed);
+            }
+        }
+        get => _verticalSpeed;
     }
 }
