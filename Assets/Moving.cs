@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class Moving : MonoBehaviour
 {
@@ -12,6 +13,8 @@ public class Moving : MonoBehaviour
     private float _horizontalMovement;
     private bool _onTheGround;
     private float _verticalSpeed;
+    private bool _playerOnPlatform;
+    private TilemapCollider2D _col;
 
     // Start is called before the first frame update
     void Start()
@@ -45,12 +48,20 @@ public class Moving : MonoBehaviour
 
         _horizontalMovement = (Input.GetAxis("Horizontal"));
         Jump();
+
+        if (_playerOnPlatform && Input.GetAxisRaw("Vertical") < 0)
+        {
+            _col.enabled = false;
+            StartCoroutine(EnableCollider());
+        }
+
     }
 
     private void Awake()
     {
         _rbody = GetComponent<Rigidbody2D>();
         _animator = GetComponent<Animator>();
+        _col = GetComponent<TilemapCollider2D>();
     }
 
     private void FixedUpdate()
@@ -133,5 +144,23 @@ public class Moving : MonoBehaviour
             }
         }
         get => _verticalSpeed;
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+            _playerOnPlatform = true;
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+            _playerOnPlatform = false;
+    }
+
+    private IEnumerator EnableCollider()
+    {
+        yield return new WaitForSeconds(0.5f);
+        _col.enabled = true;
     }
 }
